@@ -11,16 +11,17 @@ export class Grille {
     createGrille() {
         let x = prompt("Choisis le nombre de colonnes");
         let y = prompt("Choisis le nombre de lignes");
+        document.body.style.backgroundColor = "black";
 
         let grille = document.createElement("TABLE");
         document.body.appendChild(grille);
-        grille.style.backgroundColor = "blue";
+        grille.style.backgroundColor = "purple";
         grille.style.margin = "auto";
         this.grille = grille;
 
         for (let i = 0; i < y; i++) {
             let tr = document.createElement("tr");
-            tr.style.backgroundColor = "blue";
+            tr.style.backgroundColor = "purple";
             grille.appendChild(tr);
 
             for (let j = 0; j < x; j++) {
@@ -44,53 +45,83 @@ export class Grille {
 
     game(td) {
         if (this.gameFin) return;
-
+    
         let colonne = td.cellIndex;
         let currentColor = this.currentPlayer.color;
-
+    
         let cells = [];
         for (let i = this.grille.rows.length - 1; i >= 0; i--) {
             let td = this.grille.rows[i].cells[colonne];
             cells.push(td);
-
+    
             if (td.style.backgroundColor === "white") {
                 td.style.backgroundColor = this.currentPlayer.color;
-                td.animate([
-                    {transform: 'translateY(-400px)'},
-                    {transform: 'translateY(0px)'}
-                ],{
-                    duration:500,
-                    iterations:1
+
+                let animation = td.animate([
+                    { transform: 'translateY(-400px)' },
+                    { transform: 'translateY(0px)' }
+                ], {
+                    duration: 500,
+                    iterations: 1
                 });
-                if (this.vertical(cells, currentColor) || this.horizontal(this.grille.rows[i].cells, currentColor) || this.diagonalGauche(this.grille.rows, currentColor) || this.diagonaleDroite(this.grille.rows, currentColor)) {
-                    alert(`Le joueur ${this.currentPlayer.id} a gagné !`);
-                    this.gameFin = true;
-                    this.desactiveGame();
-                } else {
-                    this.switchPlayer();
-                    this.currentPlayerTour();
-                }
+    
+                animation.onfinish = () => {
+                    if (this.vertical(cells, currentColor) || 
+                        this.horizontal(this.grille.rows[i].cells, currentColor) || 
+                        this.diagonalGauche(this.grille.rows, currentColor) || 
+                        this.diagonaleDroite(this.grille.rows, currentColor)) {
+                        
+                        alert(`Le joueur ${this.currentPlayer.id} a gagné !`);
+                        this.gameFin = true;
+                        this.desactiveGame();
+                    } else {
+                        this.switchPlayer();
+                        this.currentPlayerTour();
+                    }
+    
+                    if (!this.gameFin && this.egalite()) {
+                        alert("Match nul !");
+                        this.gameFin = true;
+                        this.desactiveGame();
+                    }
+                };
+    
                 break;
             }
         }
-
-        if (!this.gameFin && this.egalite()) {
-            alert("Match nul !");
-            this.gameFin = true;
-            this.desactiveGame();
-        }
     }
-
+    
     buttonRelancer() {
         let buttonRelancer = document.createElement("button");
-        buttonRelancer.textContent = "Relançez une partie";
-        buttonRelancer.style.backgroundColor = "black"
-        buttonRelancer.style.color = "white"
+        buttonRelancer.textContent = "Relancez une partie";
+    
+        buttonRelancer.style.backgroundColor = "purple";
+        buttonRelancer.style.color = "white";
+        buttonRelancer.style.border = "none";
+        buttonRelancer.style.padding = "10px 20px";
+        buttonRelancer.style.fontSize = "1.2em";
+        buttonRelancer.style.fontWeight = "bold";
+        buttonRelancer.style.marginTop = "20px";
+        buttonRelancer.style.marginLeft = "20px";
+        buttonRelancer.style.marginBottom = "20px";
+        buttonRelancer.style.borderRadius = "8px";
         buttonRelancer.style.cursor = "pointer";
-        buttonRelancer.style.borderRadius = "1em"
+        buttonRelancer.style.transition = "background 0.3s ease-in-out, transform 0.2s ease-in-out";
+
+        buttonRelancer.addEventListener("mouseenter", () => {
+            buttonRelancer.style.backgroundColor = "purple";
+            buttonRelancer.style.transform = "scale(1.05)";
+        });
+        buttonRelancer.addEventListener("mouseleave", () => {
+            // buttonRelancer.style.backgroundColor = "violet";
+            buttonRelancer.style.transform = "scale(1)";
+        });
+    
         buttonRelancer.addEventListener("click", () => this.rejouer());
         document.body.appendChild(buttonRelancer);
     }
+    
+    
 
     rejouer() {
         this.gameFin = false;
@@ -205,15 +236,27 @@ export class Grille {
 
     currentPlayerTour() {
         let currentPlayerText = document.getElementById("currentPlayer");
+    
         if (!currentPlayerText) {
             currentPlayerText = document.createElement("div");
             currentPlayerText.id = "currentPlayer";
-            currentPlayerText.style.color = "black";
+    
+            currentPlayerText.style.fontSize = "1.5em";
             currentPlayerText.style.fontWeight = "bold";
+            currentPlayerText.style.color = "purple";
+            currentPlayerText.style.marginTop = "20px";
+            currentPlayerText.style.padding = "10px";
+            currentPlayerText.style.backgroundColor = "white";
+            currentPlayerText.style.display = "inline-block";
+            currentPlayerText.style.borderRadius = "8px";
+            currentPlayerText.style.boxShadow = "0px 4px 8px rgba(132, 6, 119, 0.2)";
+    
             document.body.appendChild(currentPlayerText);
         }
+    
         currentPlayerText.innerText = `Joueur en cours : ${this.currentPlayer.id}`;
     }
+    
 }
 
 export class Joueur {
